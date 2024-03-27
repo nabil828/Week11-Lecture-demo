@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .card {
+        border: 1px black solid;
+      }
+
+      .card img {
+        width: 100px;
+        height: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="result"></div>
+
+    <dialog>
+      <button autofocus>Close</button>
+      <p>This modal dialog has a groovy backdrop!</p>
+    </dialog>
+
+    <script>
+      main = async function () {
+        pokemons_result = await fetch(`http://localhost:3000/pokemons`);
+        pokemons_result_json = await pokemons_result.json();
+        console.log(pokemons_result_json);
+
+        tmp = "";
+        for (let i = 0; i < pokemons_result_json.length; i++) {
+          tmp += `
+          <div class="card">
+            ${pokemons_result_json[i].name}
+            <img loading="lazy" src="https://raw.githubusercontent.com/nabil828/pokemons-dataset/main/images/${pokemons_result_json[
+              i
+            ].id
+              .toString()
+              .padStart(3, "0")}.png">
+            
+              <button id="btn${pokemons_result_json[i].id}">
+                Show More!
+              </button>
+              
+              
+          </div>
+          `;
+        }
+        result.innerHTML += tmp;
+
+        btns = document.querySelectorAll(".card button");
+        for (let i = 0; i < btns.length; i++) {
+          btns[i].addEventListener("click", async function () {
+            // fetch the 2nd ajax request
+            all_poke_info = await fetch(
+              `http://localhost:3000/pokemon?pid=${this.id
+                .toString()
+                .substring(3)}`
+            );
+            all_poke_info_json = await all_poke_info.json();
+            document.querySelector("dialog p").innerHTML =
+              JSON.stringify(all_poke_info_json);
+
+            document.querySelector("dialog").showModal();
+          });
+        }
+
+        document
+          .querySelector("dialog button")
+          .addEventListener("click", () => {
+            document.querySelector("dialog").close();
+          });
+      };
+
+      main();
+    </script>
+  </body>
+</html>
